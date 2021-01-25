@@ -18,8 +18,7 @@ from urllib import request
 from Dtime import Uptime
 import platform
 import psutil
-import cpuinfo
-from main import cpu
+from ext import cpu
 
 Uptime.uptimeset()
 embedcolor = 0xffff33
@@ -38,22 +37,30 @@ class Commands(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        embed=discord.Embed(title=f'환영합니다!',description=f'{member.mention}님이  {member.guild}에 들어오셨습니다. 환영합니다 ! \n현재 서버 인원수: {str(len(member.guild.members))}명',color=embedcolor)
-        embed.set_thumbnail(url=member.avatar_url)
-        await member.guild.system_channel.send(embed=embed)
+        try:
+            embed=discord.Embed(title=f'환영합니다!',description=f'{member.mention}님이  {member.guild}에 들어오셨습니다. 환영합니다 ! \n현재 서버 인원수: {str(len(member.guild.members))}명',color=embedcolor)
+            embed.set_footer(text="환영메시지를 받고싶지 않으시면 봇이 이 채널을 못보게 해주세요")
+            embed.set_thumbnail(url=member.avatar_url)
+            await member.guild.system_channel.send(embed=embed)
+        except:
+            pass
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
-        embed=discord.Embed(title=f'안녕히 가세요',description=f'{member.mention}님이  나가셨습니다. 안녕히 가세요 \n현재 서버 인원수: {str(len(member.guild.members))}명',color=embederrorcolor)
-        embed.set_thumbnail(url=member.avatar_url)
-        await member.guild.system_channel.send(embed=embed)
+        try:
+            embed=discord.Embed(title=f'안녕히 가세요',description=f'{member.mention}님이  나가셨습니다. 안녕히 가세요 \n현재 서버 인원수: {str(len(member.guild.members))}명',color=embederrorcolor)
+            embed.set_footer(text="환영메시지를 받고싶지 않으시면 봇이 이 채널을 못보게 해주세요")
+            embed.set_thumbnail(url=member.avatar_url)
+            await member.guild.system_channel.send(embed=embed)
+        except:
+            pass
 
     @commands.command(name="핑", help="핑을 보여줌")
     async def ping(self, ctx):
         pings = round(self.bot.latency*1000)
         if pings < 100:
-             pinglevel = '🔵 매우좋음'
-             color=embedcolor
+            pinglevel = '🔵 매우좋음'
+            color=embedcolor
         elif pings < 300: 
             pinglevel = '🟢 양호함'
             color=embedcolor
@@ -74,7 +81,7 @@ class Commands(commands.Cog):
         embed=discord.Embed(title="INFINITY봇 링크", color=embedcolor)
         embed.add_field(name="INFINITY 서버초대", value="[서버](https://discord.gg/UByy5cf)", inline=False)
         embed.add_field(name="INFINITY봇 초대", value="[봇(관리자)](https://discord.com/api/oauth2/authorize?client_id=765535083124752394&permissions=8&scope=bot)", inline=False)
-        embed.add_field(name="INFINITY봇 초대", value="[봇(최소기능)](https://discord.com/api/oauth2/authorize?client_id=765535083124752394&permissions=2084433143&scope=bot)", inline=False)
+        embed.add_field(name="INFINITY봇 초대", value="[봇(최소기능)](https://discord.com/oauth2/authorize?client_id=765535083124752394&scope=bot&permissions=1610607742)", inline=False)
         embed.add_field(name="INFINITY봇 공식홈페이지", value="[밝은테마](http://infinitybot.kro.kr)", inline=False)
         embed.add_field(name="INFINITY봇 공식홈페이지", value="[어두운테마](http://black.infinitybot.kro.kr)", inline=False)
         embed.set_footer(text="이 링크들이 가장 안전해!")
@@ -95,7 +102,7 @@ class Commands(commands.Cog):
         await ctx.send(embed=embed)
     
     @commands.command(name="프사", help="프로필사진 보여줌")
-    async def profilepicture(self,ctx, member:discord.Member=None):
+    async def profilepicture(self,ctx, *, member:discord.Member=None):
         if member == None:
             member = ctx.author
         embed = discord.Embed(title=f'{member.name} 님의 프사', color=embedcolor)
@@ -115,10 +122,10 @@ class Commands(commands.Cog):
 
     @commands.command(name="주사위", help="랜덤 주사위값 보여줌")
     async def dice(self, ctx):
-        time.sleep(0.75)
+        await asyncio.sleep(0.75)
         embed = discord.Embed(title="주사위 굴리는중...", color=embedcolor)
         dice = await ctx.send(embed=embed)
-        time.sleep(0.75)
+        await asyncio.sleep(0.75)
         embed=discord.Embed(title="랜덤 주사위",description=':game_die: '+ ':one:', color=embedcolor)
         embed1=discord.Embed(title="랜덤 주사위",description=':game_die: '+ ':two:', color=embedcolor)
         embed2=discord.Embed(title="랜덤 주사위",description=':game_die: '+ ':three:', color=embedcolor)
@@ -169,39 +176,44 @@ class Commands(commands.Cog):
     @commands.command(name="서버정보", help="서버정보 보여줌")
     async def severinfo(self, ctx):
         roles = [role for role in ctx.guild.roles]
+        member_count = len(ctx.guild.members)
+        only_member_count = len([m for m in ctx.guild.members if not m.bot])
         guild_age = (ctx.message.created_at - ctx.author.guild.created_at).days
         online = len({m.id for m in ctx.author.guild.members if m.status is not discord.Status.offline})
         embed = discord.Embed(title=f'{ctx.guild}의 정보', color=embedcolor)
-        embed.add_field(name="서버 이름", value=ctx.guild, inline=False)
+        embed.add_field(name="서버 이름", value=ctx.guild)
+        embed.add_field(name="서버 아이디", value=ctx.guild.id)
         embed.add_field(name="서버 주인", value=f'<@{ctx.guild.owner_id}>', inline=False)
-        embed.add_field(name="서버 아이디", value=ctx.guild.id, inline=False)
-        embed.add_field(name="유저 수", value=len(ctx.guild.members), inline=False)
-        embed.add_field(name="온라인 유저 수", value=online, inline=False)
-        embed.add_field(name="길드 나이", value=guild_age, inline=False)
-        embed.add_field(name="보안 레벨", value=ctx.guild.verification_level, inline=False)
-        embed.add_field(name="서버 위치", value=ctx.guild.region, inline=False)
+        embed.add_field(name="유저 수(봇포함)", value=member_count)
+        embed.add_field(name="유저 수(봇 미포함)", value=only_member_count)
+        embed.add_field(name="온라인 유저 수", value=online)
+        embed.add_field(name="서버 나이", value=guild_age, inline=False)
+        embed.add_field(name="보안 레벨", value=ctx.guild.verification_level)
+        embed.add_field(name="서버 위치", value=ctx.guild.region)
         embed.add_field(name="역할 개수", value=len(roles), inline=False)
-        embed.add_field(name="이모지 개수", value=len(ctx.guild.emojis), inline=False)
+        embed.add_field(name="이모지 개수", value=len(ctx.guild.emojis))
         embed.add_field(name="부스트 레벨", value=ctx.guild.premium_tier, inline=False)
-        embed.add_field(name="부스트 개수", value=ctx.guild.premium_subscription_count, inline=False)
+        embed.add_field(name="부스트 개수", value=ctx.guild.premium_subscription_count)
         embed.add_field(name="규칙 채널", value=ctx.guild.rules_channel, inline=False)
-        embed.add_field(name="시스템 채널", value=ctx.guild.system_channel, inline=False)
+        embed.add_field(name="시스템 채널", value=ctx.guild.system_channel)
         embed.add_field(name="채팅 채널", value=len(ctx.guild.text_channels), inline=False)
-        embed.add_field(name="음성 채널", value=len(ctx.guild.voice_channels), inline=False)
+        embed.add_field(name="음성 채널", value=len(ctx.guild.voice_channels))
         embed.set_thumbnail(url=ctx.author.guild.icon_url)
         await ctx.send(embed=embed)
 
-    #@commands.command(name="실1검", help="실시간 검색어 보여줌")
-    #async def old_search(self, ctx):
-        #url = "https://m.search.naver.com/search.naver?query=%EC%8B%A4%EA%B2%80"
-        #html = urlopen(url)
-        #parse = BeautifulSoup(html, "html.parser")
-        #result = ""
-        #tags = parse.find_all("span", {"class" : "tit _keyword"})
-        #for i, e in enumerate(tags):
-            #result = result + (str(i+1))+"위  "+e.text+"\n"
-        #embed=discord.Embed(title="초록창실검", description= f"{(result)}", color=embedcolor)
-        #await ctx.send(embed=embed)
+'''
+    @commands.command(name="실1검", help="실시간 검색어 보여줌")
+    async def old_search(self, ctx):
+        url = "https://m.search.naver.com/search.naver?query=%EC%8B%A4%EA%B2%80"
+        html = urlopen(url)
+        parse = BeautifulSoup(html, "html.parser")
+        result = ""
+        tags = parse.find_all("span", {"class" : "tit _keyword"})
+        for i, e in enumerate(tags):
+            result = result + (str(i+1))+"위  "+e.text+"\n"
+        embed=discord.Embed(title="초록창실검", description= f"{(result)}", color=embedcolor)
+        await ctx.send(embed=embed)
+'''
 
     @commands.command(name="실검", aliases = ['실시간검색어'], help="실시간 검색어를 보여줍니다.")
     async def search(self, ctx):
@@ -278,6 +290,7 @@ class Commands(commands.Cog):
         embed.add_field(name="램 크기", value=str(round(psutil.virtual_memory().total / (1024.0 **3)))+"(GB)", inline=False)
         embed.add_field(name="서버 수", value=len(self.bot.guilds))
         embed.add_field(name="유저 수", value=len(self.bot.users))
+        embed.add_field(name="개발자", value="jin^^*~#3739")
         embed.set_thumbnail(url=self.bot.user.avatar_url)
         await info.edit(embed=embed)
 
@@ -295,9 +308,9 @@ class Commands(commands.Cog):
                 json.dump(guilds, f)
             await ctx.send(f'{ctx.author}님이 <#{channel1.id}>에 공지설정 했습니다.')
 
-    @commands.command()
-    async def 개발자(self, ctx):
-        await ctx.send("이 봇의 개발자는 jin^^*~#3739 입니다.")
+    @commands.command(name="개발자", aliases=["developer"], help="개발자를 보여줍니다")
+    async def developer(self, ctx):
+        await ctx.send("`이 봇의 개발자는 jin^^*~#3739 입니다.\njin^^*~#3739 made this bot.`")
     
     @commands.command(name="하트확인")
     async def _checkvote(self, ctx):
@@ -440,6 +453,17 @@ class Commands(commands.Cog):
         except:
             await ctx.send("그런 위치는 없어요")
 
+    @commands.command(name="이더리움", aliases=["ETH"], help="이더리움 시세 보여드립니다")
+    async def eth(self, ctx):
+        html = requests.get("https://coinmarketcap.com/currencies/ethereum/")
+        soup = BeautifulSoup(html.text, 'html.parser')
+        price = soup.find('td').text
+        change = soup.find('p',{'class': 'sc-1eb5slv-0 sc-1siv958-1 jnWaEv'}).text
+        embed=discord.Embed(title="이더리움 가격", color=embedcolor)
+        embed.add_field(name="가격", value=price)
+        embed.add_field(name="변동률", value=change)
+        await ctx.send(embed=embed)
+
     @commands.command(name="상메", help="자신이나 다른사람의 상태메시지를 보여줍니다")
     async def status(self, ctx, m: discord.Member=None):
         if m == None:
@@ -467,15 +491,6 @@ class Commands(commands.Cog):
         else:
             return await ctx.send("상메가 없습니다")
 
-    @commands.command(name="임베드", help="노잼커맨드")
-    async def embbed(self, ctx):
-        embed=discord.Embed(color=embedcolor)
-        embed.add_field(name="파이썬 역할얻기", value="<:python:796906415519957013>")
-        embed.add_field(name="자바스크립트 역할얻기", value="<:javasc:796907038575820840>")
-        embed.add_field(name="C/C++ 역할얻기", value="<:C_:796907402289086465>")
-        embed.add_field(name="공지사항 알림", value="<:__:789255771727986698>")
-        await ctx.send(embed=embed)
-
     @commands.command(name="주소검색", aliases=["주소"], help="정확한 주소를 보여줍니다")
     async def address(self, ctx, *, keyword:str=None):
         if keyword == None:
@@ -483,34 +498,70 @@ class Commands(commands.Cog):
         else:
             try:
                 url = f'https://dapi.kakao.com/v2/local/search/keyword.json?query={keyword}'
-                headers = {"Authorization": "KakaoAK "}
+                headers = {"Authorization": "KakaoAK ㅁㄴㅇㄹ"}
                 name = requests.get(url, headers = headers).json()['documents'][0]['place_name']
                 address = requests.get(url, headers = headers).json()['documents'][0]['address_name']
                 phone = requests.get(url, headers = headers).json()['documents'][0]['phone']
                 road_address = requests.get(url, headers = headers).json()['documents'][0]['road_address_name']
-                if phone == None:
+                category = requests.get(url, headers = headers).json()['documents'][0]['category_group_name']
+                if phone == "":
                     phone = "없음"
+                if address == "":
+                    address = "없음"
+                if road_address == "":
+                    road_address = "없음"
+                if category == "":
+                    category = "없음"
                 embed=discord.Embed(title=f"{keyword} 검색결과", color=embedcolor)
                 embed.add_field(name="이름", value=name, inline=False)
                 embed.add_field(name="주소", value=address)
                 embed.add_field(name="도로명주소", value=road_address)
-                embed.add_field(name="전화번호", value=phone)
+                embed.add_field(name="전화번호", value=phone, inline=False)
+                embed.add_field(name="종류", value=category)
                 await ctx.send(embed=embed)
             except:
-                try:
-                    url = f'https://dapi.kakao.com/v2/local/search/keyword.json?query={keyword}'
-                    headers = {"Authorization": "KakaoAK dfcf66d3fccaeb33654a84d7b87c5ea5"}
-                    name = requests.get(url, headers = headers).json()['documents'][0]['place_name']
-                    address = requests.get(url, headers = headers).json()['documents'][0]['address_name']
-                    road_address = requests.get(url, headers = headers).json()['documents'][0]['road_address_name']
-                    embed=discord.Embed(title=f"{keyword} 검색결과", color=embedcolor)
-                    embed.add_field(name="이름", value=name, inline=False)
-                    embed.add_field(name="주소", value=address)
-                    embed.add_field(name="도로명주소", value=road_address)
-                    await ctx.send(embed=embed)
-                except:
-                    await ctx.send("오류가 발생했어요")                
+                await ctx.send("오류가 발생했어요")                
 
+    @commands.command(name="이름번역", help="이름을 영어로 번역합니다")
+    async def name_trans(self, ctx, name:str=None):
+        if name == None:
+            return await ctx.send("이름을 입력해주세요")
+        else:
+            client_id = "ㅁㄴㅇㄹ"
+            client_secret = "ㅁㄴㅇㄹ"
+            encText = urllib.parse.quote(name)
+            url = f"https://openapi.naver.com/v1/krdict/romanization?query={encText}"
+            request = urllib.request.Request(url)
+            request.add_header("X-Naver-Client-Id",client_id)
+            request.add_header("X-Naver-Client-Secret",client_secret)
+            response = urllib.request.urlopen(request)
+            rescode = response.getcode()
+            if(rescode==200):
+                response_body = response.read()
+                json_dict = json.loads(response_body.decode('utf-8'))
+                result = json_dict['aResult'][0]
+                name_items = result['aItems']
+                print(name_items)
+                names = [name_item['name'] for name_item in name_items]
+                embed=discord.Embed(title=f"{name}의 번역결과", color=embedcolor)
+                embed.add_field(name=names, value="정확한 결과는 아닙니다.")
+                await ctx.send(embed=embed)
+            else:
+                print("Error Code:" + rescode)
+
+    @commands.command(name="서버확인", help="관리자용 명령어입니다")
+    async def tttttest(self, ctx):
+        if ctx.author.id == 671231351013376015:
+            list1 = self.bot.guilds[0]
+            names = [list1['name'] for list1 in name]
+            with open("guilds.txt", 'w', -1, "utf-8") as a:
+                a.write(str(names))
+            file1 = discord.File("guilds.txt")
+            await ctx.author.send(file=file1)
+            os.remove("guilds.txt")
+        else:
+            await ctx.send("봇 개발자만 가능해여")
+  
 def setup(bot):
     bot.add_cog(Commands(bot))
 print("Commands")
