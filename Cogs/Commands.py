@@ -149,10 +149,6 @@ class Commands(commands.Cog):
             status = "자리비움🟡"
         else:
             status = "오프라인⚪"
-        if user.bot == False:
-            bot = "유저"
-        else:
-            bot = "봇"
         try:
             game = str(ctx.author.activities[0].name)
             act = str(ctx.author.activity)
@@ -169,7 +165,7 @@ class Commands(commands.Cog):
         embed.add_field(name="사용자 지정 상태", value=f"{act}", inline=False)
         embed.add_field(name="게임 활동", value=game)
         embed.add_field(name="최상위 역할", value=user.top_role.mention, inline=False)
-        embed.add_field(name="봇", value=bot)
+        embed.add_field(name="봇", value="봇" if user.bot else "유저")
         embed.set_thumbnail(url=user.avatar_url)
         await ctx.send(embed=embed)
 
@@ -200,20 +196,6 @@ class Commands(commands.Cog):
         embed.add_field(name="음성 채널", value=len(ctx.guild.voice_channels))
         embed.set_thumbnail(url=ctx.author.guild.icon_url)
         await ctx.send(embed=embed)
-
-'''
-    @commands.command(name="실1검", help="실시간 검색어 보여줌")
-    async def old_search(self, ctx):
-        url = "https://m.search.naver.com/search.naver?query=%EC%8B%A4%EA%B2%80"
-        html = urlopen(url)
-        parse = BeautifulSoup(html, "html.parser")
-        result = ""
-        tags = parse.find_all("span", {"class" : "tit _keyword"})
-        for i, e in enumerate(tags):
-            result = result + (str(i+1))+"위  "+e.text+"\n"
-        embed=discord.Embed(title="초록창실검", description= f"{(result)}", color=embedcolor)
-        await ctx.send(embed=embed)
-'''
 
     @commands.command(name="실검", aliases = ['실시간검색어'], help="실시간 검색어를 보여줍니다.")
     async def search(self, ctx):
